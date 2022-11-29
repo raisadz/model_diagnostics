@@ -21,7 +21,7 @@ with open("config.json", "r") as f:
     config = json.load(f)
 
 test_data_path = os.path.join(config["test_data_path"])
-
+output_folder_path = os.path.join(config["output_folder_path"])
 # prediction_model = None
 
 
@@ -49,7 +49,7 @@ def scoring():
 @app.route("/summarystats", methods=["GET", "OPTIONS"])
 def summarystats():
     # check means, medians, and modes for each column
-    filename = test_data_path + "/testdata.csv"
+    filename = output_folder_path + "/finaldata.csv"
     thedata = pd.read_csv(filename)
     df_summary = dataframe_summary(thedata)
     return str(df_summary)  # return a list of all calculated summary statistics
@@ -58,7 +58,7 @@ def summarystats():
 # Diagnostics Endpoint
 @app.route("/diagnostics", methods=["GET", "OPTIONS"])
 def diagnostics():
-    filename = test_data_path + "/testdata.csv"
+    filename = output_folder_path + "/finaldata.csv"
     thedata = pd.read_csv(filename)
     # check timing and percent NA values
     return_time = execution_time()
@@ -68,4 +68,4 @@ def diagnostics():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True, threaded=True)
+    app.run(host="0.0.0.0", port=8000)
