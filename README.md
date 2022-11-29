@@ -22,7 +22,7 @@ Folder `scripts` contains the main implemented scripts for the project. The foll
 Clone the repo:
 
 ```bash
-git clone git@https://github.com/raisadz/model_diagnostics.git
+git clone git@github.com:raisadz/model_diagnostics.git
 cd model_diagnostics
 ```
 
