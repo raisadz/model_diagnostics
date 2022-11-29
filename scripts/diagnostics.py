@@ -1,10 +1,10 @@
 import io
 import json
+import logging
 import os
 import pickle
 import subprocess
 import timeit
-import logging
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ def model_predictions(input_data):
     )
     logger.info("Calculating predictions")
     preds = model.predict(X_test).tolist()
-    return preds 
+    return preds
 
 
 def dataframe_summary(input_data):
@@ -57,7 +57,7 @@ def execution_time():
     training_time = timeit.default_timer() - start_training_time
 
     return_time = [ingestion_time, training_time]
-    return return_time 
+    return return_time
 
 
 def outdated_packages_list():

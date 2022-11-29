@@ -1,8 +1,8 @@
 import ast
 import json
+import logging
 import os
 import sys
-import logging
 
 import pandas as pd
 
@@ -21,19 +21,23 @@ def check_new_data(input_folder_path):
     return new_files
 
 
-
 def check_model_drift(output_folder_path, prod_deployment_path, output_model_path):
     with open(prod_deployment_path + "/latestscore.txt", "r") as f:
         latestscore = ast.literal_eval(f.read())
 
     most_recent_data = pd.read_csv(output_folder_path + "/finaldata.csv")
-    new_score = score_model(prod_deployment_path, output_model_path, most_recent_data, dropped_columns = ['corporation'])
+    new_score = score_model(
+        prod_deployment_path,
+        output_model_path,
+        most_recent_data,
+        dropped_columns=["corporation"],
+    )
 
     model_drift = new_score < latestscore
     return model_drift
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with open("config.json", "r") as f:
         config = json.load(f)
 
@@ -50,15 +54,17 @@ if __name__ == '__main__':
     logging.info("Found new data, ingest it")
     os.system("python -m scripts.ingestion")
 
-    model_drift = check_model_drift(output_folder_path, prod_deployment_path, output_model_path)
+    model_drift = check_model_drift(
+        output_folder_path, prod_deployment_path, output_model_path
+    )
     if model_drift is False:
         logging.info("No model drift found, exit the process")
         sys.exit()
     else:
-        logging.info("Model drift found, re-training and re-deployment") 
+        logging.info("Model drift found, re-training and re-deployment")
         os.system("python -m scripts.training")
         os.system("python -m scripts.deployment")
-    
+
     logging.info("Run diagnostics and reporting")
     os.system("python -m scripts.reporting")
     os.system("python -m scripts.app")

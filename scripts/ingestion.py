@@ -1,7 +1,7 @@
+import glob
 import json
-import os
-import glob 
 import logging
+import os
 
 import pandas as pd
 
@@ -16,9 +16,10 @@ output_folder_path = config["output_folder_path"]
 
 os.makedirs(output_folder_path, exist_ok=True)
 
+
 def merge_multiple_dataframe():
     logger.info(f"Read datasets from {input_folder_path} folder")
-    datasets = glob.glob(f'{input_folder_path}/*.csv')
+    datasets = glob.glob(f"{input_folder_path}/*.csv")
     logger.info("Merge datasets")
     df_total = pd.concat(map(pd.read_csv, datasets))
     logger.info("Clean data")
@@ -27,6 +28,7 @@ def merge_multiple_dataframe():
     df_dedup.to_csv(output_folder_path + "/finaldata.csv", index=False)
     with open(output_folder_path + "/ingestedfiles.txt", "w") as f:
         f.write(str(os.listdir()))
+
 
 def clean_data(df):
     return df.drop_duplicates()

@@ -1,3 +1,3 @@
-from os import environ 
+from os import environ
 
-SECRET_KEY = environ.get('SECRET_KEY')
+SECRET_KEY = environ.get("SECRET_KEY")

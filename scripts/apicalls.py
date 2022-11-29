@@ -1,6 +1,6 @@
 import json
-import os
 import logging
+import os
 
 import requests
 
@@ -14,7 +14,9 @@ with open("config.json", "r") as f:
 output_model_path = os.path.join(config["output_model_path"])
 
 logger.info("Prediction endpoint")
-response_prediction = requests.get(f"{URL}/prediction?filename=testdata/testdata.csv").content
+response_prediction = requests.get(
+    f"{URL}/prediction?filename=testdata/testdata.csv"
+).content
 logger.info("Scoring endpoint")
 response_scoring = requests.get(f"{URL}/scoring").content
 logger.info("Summarystats endpoint")
