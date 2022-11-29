@@ -1,4 +1,4 @@
 # service cron start
 # crontab -e
 
-10 * * *  * python -m scripts.fullprocess
+*/10 * * * * python -m scripts.fullprocess

@@ -57,3 +57,14 @@ Then in a new terminal window run:
 ```bash
 curl 127.0.0.1:8000/prediction?filename=testdata/testdata.csv
 ```
+
+## Using cron to run fullprocess 
+```bash
+service cron start
+crontab -e
+```
+
+For example, to run fullprocess script every 10 mins write in crontab:
+```bash
+*/10 * * * * python -m scripts.fullprocess
+```

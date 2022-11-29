@@ -4,9 +4,13 @@ import os
 import pickle
 import subprocess
 import timeit
+import logging
 
 import numpy as np
 import pandas as pd
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
+logger = logging.getLogger()
 
 with open("config.json", "r") as f:
     config = json.load(f)
@@ -16,33 +20,38 @@ prod_deployment_path = os.path.join(config["prod_deployment_path"])
 
 
 def model_predictions(input_data):
+    logger.info("Running function model_predictions")
+    logger.info(f"Reading model from {prod_deployment_path}/trainedmodel.pkl")
     with open(prod_deployment_path + "/" + "trainedmodel.pkl", "rb") as f:
         model = pickle.load(f)
     X_test = np.array(
         input_data[["lastmonth_activity", "lastyear_activity", "number_of_employees"]]
     )
+    logger.info("Calculating predictions")
     preds = model.predict(X_test).tolist()
     return preds 
 
 
 def dataframe_summary(input_data):
+    logger.info("Running function dataframe_summary")
     numeric_cols = list(input_data.select_dtypes("number").columns)
-    means_list = input_data[numeric_cols].mean(axis=0).tolist()
-    medians_list = input_data[numeric_cols].median(axis=0).tolist()
-    std_list = input_data[numeric_cols].std(axis=0).tolist()
-    statistics_list = means_list + medians_list + std_list
+    stats = input_data[numeric_cols].agg(["mean", "median", "std"])
+    statistics_list = stats.values.reshape(-1, 1).ravel().tolist()
     return statistics_list
 
 
 def dataframe_percent_na(input_data):
+    logger.info("Running function calculating the percent of NA")
     return (input_data.isna().sum() / input_data.shape[0]).tolist()
 
 
 def execution_time():
+    logger.info("Calculating ingestion execution time")
     start_ingestion_time = timeit.default_timer()
     os.system("python scripts/ingestion.py")
     ingestion_time = timeit.default_timer() - start_ingestion_time
 
+    logger.info("Calculating training execution time")
     start_training_time = timeit.default_timer()
     os.system("python scripts/training.py")
     training_time = timeit.default_timer() - start_training_time
@@ -52,6 +61,7 @@ def execution_time():
 
 
 def outdated_packages_list():
+    logger.info("Finding outdated packages")
     out = subprocess.run(
         ["pip", "list", "--outdated"], capture_output=True, text=True
     ).stdout

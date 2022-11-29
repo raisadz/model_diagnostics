@@ -1,33 +1,37 @@
 import json
 import os
+import logging
 
 import requests
 
-# Specify a URL that resolves to your workspace
+logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
+logger = logging.getLogger()
+
 URL = "http://127.0.0.1:8000"
 
 with open("config.json", "r") as f:
     config = json.load(f)
 output_model_path = os.path.join(config["output_model_path"])
 
-# Call each API endpoint and store the responses
-response1 = requests.get(f"{URL}/prediction?filename=testdata/testdata.csv").content
-response2 = requests.get(f"{URL}/scoring").content
-response3 = requests.get(f"{URL}/summarystats").content
-response4 = requests.get(f"{URL}/diagnostics").content
+logger.info("Prediction endpoint")
+response_prediction = requests.get(f"{URL}/prediction?filename=testdata/testdata.csv").content
+logger.info("Scoring endpoint")
+response_scoring = requests.get(f"{URL}/scoring").content
+logger.info("Summarystats endpoint")
+response_summarystats = requests.get(f"{URL}/summarystats").content
+logger.info("Diagnostics endpoint")
+response_diagnostics = requests.get(f"{URL}/diagnostics").content
 
-# combine all API responses
 responses = (
-    response1.decode()
+    response_prediction.decode()
     + "\n"
-    + response2.decode()
+    + response_scoring.decode()
     + "\n"
-    + response3.decode()
+    + response_summarystats.decode()
     + "\n"
-    + response4.decode()
+    + response_diagnostics.decode()
 )
 
-# write the responses to your workspace
-
+logger.info(f"Write all responses to {output_model_path}/apireturns.txt")
 with open(output_model_path + "/apireturns.txt", "w") as f:
     f.write(responses)
