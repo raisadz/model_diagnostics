@@ -1,28 +1,25 @@
 import json
 import os
 import pickle
+import logging
 
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
 
-# Load config.json and get path variables
-with open("config.json", "r") as f:
-    config = json.load(f)
+logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
+logger = logging.getLogger()
 
-dataset_csv_path = os.path.join(config["output_folder_path"])
-model_path = os.path.join(config["output_model_path"])
-
-os.makedirs(model_path, exist_ok=True)
-
-
-# Function for training the model
-def train_model():
+def train_model(dataset_csv_path, model_path, dropped_columns = None):
+    logger.info(f"Read datasets from {dataset_csv_path} folder")
     df = pd.read_csv(dataset_csv_path + "/" + "finaldata.csv")
-    X = np.array(df[["lastmonth_activity", "lastyear_activity", "number_of_employees"]])
-    y = df["exited"].values.reshape(-1, 1).ravel()
+    if dropped_columns is not None:
+        df = df.drop(columns = dropped_columns)
+    X = df.copy()
+    y = X.pop('exited')
 
-    # use this logistic regression for training
     lr = LogisticRegression(
         C=1.0,
         class_weight=None,
@@ -40,13 +37,28 @@ def train_model():
         verbose=0,
         warm_start=False,
     )
-
-    # fit the logistic regression to your data
-    model = lr.fit(X, y)
-    # write the trained model to your workspace in a file called trainedmodel.pkl
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+    logger.info('Training logistic regression')
+    model = lr.fit(X_train, y_train)
+    preds_train = model.predict(X_train)
+    preds_test = model.predict(X_test)
+    f1_train = f1_score(y_train, preds_train)
+    f1_test = f1_score(y_test, preds_test)
+    logger.info(f'F1 score on training is {f1_train}')
+    logger.info(f'F1 score on test is {f1_test}')
+    logger.info(f'Saving trained model to {model_path}/trainedmodel.pkl')
     with open(model_path + "/" + "trainedmodel.pkl", "wb") as f:
         pickle.dump(model, f)
 
 
 if __name__ == "__main__":
-    train_model()
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    dataset_csv_path = os.path.join(config["output_folder_path"])
+    model_path = os.path.join(config["output_model_path"])
+
+    os.makedirs(model_path, exist_ok=True)
+
+    train_model(dataset_csv_path=dataset_csv_path, model_path=model_path, dropped_columns= ['corporation'])
