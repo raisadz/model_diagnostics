@@ -58,7 +58,7 @@ Then in a new terminal window run:
 curl 127.0.0.1:8000/prediction?filename=testdata/testdata.csv
 ```
 
-## Using cron to run fullprocess 
+## Using cron to automate re-deployment
 ```bash
 service cron start
 crontab -e
